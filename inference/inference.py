@@ -1,12 +1,39 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from flask import Flask, request, jsonify
 import torch
+import os
+import boto3
 
 app = Flask(__name__)
-MODEL_PATH = "./model"
 
 # Set device (GPU if available, else CPU)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# Define model path and S3 info
+S3_BUCKET = os.environ.get("S3_BUCKET", "my-deepseek-models-bucket")
+S3_PREFIX = os.environ.get("S3_PREFIX", "model")
+MODEL_PATH = "/app/model"
+
+# Download model from S3
+def download_model_from_s3():
+    s3 = boto3.client("s3")
+    os.makedirs(MODEL_PATH, exist_ok=True)
+    
+    paginator = s3.get_paginator("list_objects_v2")
+    for page in paginator.paginate(Bucket=S3_BUCKET, Prefix=S3_PREFIX):
+        for obj in page.get("Contents", []):
+            s3_key = obj["Key"]
+            relative_path = os.path.relpath(s3_key, S3_PREFIX)
+            local_file_path = os.path.join(MODEL_PATH, relative_path)
+
+            os.makedirs(os.path.dirname(local_file_path), exist_ok=True)
+            s3.download_file(S3_BUCKET, s3_key, local_file_path)
+
+# Only download if not already cached
+if not os.path.exists(MODEL_PATH) or not os.listdir(MODEL_PATH):
+    print("Downloading model from S3...")
+    download_model_from_s3()
+    print("Model download complete.")
 
 # Load tokenizer
 tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH, trust_remote_code=True)
@@ -18,8 +45,8 @@ if tokenizer.pad_token is None:
 # Load model
 model = AutoModelForCausalLM.from_pretrained(
     MODEL_PATH,
-    torch_dtype=torch.float16,
-    device_map="auto",
+    torch_dtype=torch.float16 if device.type == "cuda" else torch.float32,
+    device_map="auto" if device.type == "cuda" else {"": device},
     trust_remote_code=True,
     low_cpu_mem_usage=True
 )
@@ -29,7 +56,7 @@ def generate():
     try:
         data = request.json
         prompt = data.get("prompt", "")
-        inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+        inputs = tokenizer(prompt, return_tensors="pt").to(device)
 
         output = model.generate(
             **inputs,
