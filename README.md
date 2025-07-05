@@ -98,7 +98,7 @@ deepseek-sagemaker-deploy/
 
 ### 🖼 AWS Deployment Architecture
 
-![AWS Architecture](images/aws-deployment.png)
+![AWS Architecture](images/aws_deployment.png)
 
 ---
 
