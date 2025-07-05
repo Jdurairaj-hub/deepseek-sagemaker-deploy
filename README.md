@@ -51,7 +51,7 @@ deepseek-sagemaker-deploy/
 
 ### 🖼 Local Deployment Architecture
 
-![Local Architecture](images/local-deployment.png)
+![Local Architecture](images/local_deploy.png)
 
 ---
 
