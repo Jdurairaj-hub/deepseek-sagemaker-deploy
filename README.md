@@ -51,7 +51,7 @@ deepseek-sagemaker-deploy/
 
 ### 🖼 Local Deployment Architecture
 
-![Local Architecture](local-deployment.png)
+![Local Architecture](images/local-deployment.png)
 
 ---
 
@@ -98,7 +98,7 @@ deepseek-sagemaker-deploy/
 
 ### 🖼 AWS Deployment Architecture
 
-![AWS Architecture](aws-deployment.png)
+![AWS Architecture](images/aws-deployment.png)
 
 ---
 
