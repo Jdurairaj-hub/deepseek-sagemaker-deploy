@@ -11,7 +11,7 @@ def main():
         region = sagemaker_session.boto_region_name
         
         # Use your SageMaker execution role ARN
-        role = "arn:aws:iam::011528295795:role/service-role/AmazonSageMaker-ExecutionRole-20240308T123456"  # Replace with your role ARN
+        role = "Add your Role"  # Replace with your role ARN
 
         # Get the S3 bucket name from environment or use default
         bucket_name = os.getenv('SAGEMAKER_BUCKET', 'deepseek-models')
